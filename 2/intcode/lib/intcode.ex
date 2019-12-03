@@ -32,7 +32,7 @@ defmodule Intcode do
     |> Enum.map(&String.to_integer(&1))
   end
 
-  def part_2() do
+  def part_2_iterative() do
     input = parse_input()
 
     for i <- 0..99 do
@@ -49,5 +49,29 @@ defmodule Intcode do
       end
     end
   end
-  
+
+  def part_2_recursive() do
+    input = parse_input()
+    rt(0, 0, input)
+  end
+
+  defp rt(i, j, input) do
+    val = Enum.at(part_1(input), 0)
+
+    cond do
+      val == 19690720 ->
+        noun = Enum.at(input, 1)
+        verb = Enum.at(input, 2)
+        %{noun: noun, verb: verb, result: 100 * noun + verb}
+
+      true ->
+        if i < 99 do
+          if j >= 99 do
+            rt(i + 1, 0, List.replace_at(input, 1, i))
+          else
+            rt(i, j + 1, List.replace_at(input, 2, j))
+          end
+        end
+    end
+  end
 end
