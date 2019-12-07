@@ -1,24 +1,49 @@
 defmodule CrossedWires do
   def part_1() do
     parse_input()
-      |> closest_intersection()
+    |> closest_distance()
   end
 
-  def closest_intersection(wires) do
-    paths = wires
-    |> String.split("\n")
-    |> Enum.map(&generate_path/1)
+  def part_2() do
+    parse_input()
+    |> number_of_steps()
 
-    # maybe refactoring to MapSet?
-    hd(paths)
-    |> Enum.filter(fn x -> Enum.member?(hd(tl(paths)), x) end)
-    |> tl
+  end
+
+  def number_of_steps(wires) do
+    [p1, p2] =
+      wires
+      |> String.split("\n")
+      |> Enum.map(&generate_path/1)
+
+    closest_intersections(wires)
+    |> Enum.map(fn i -> Enum.find_index(p1, &(i == &1)) + Enum.find_index(p2, &(i == &1)) end)
+    |> Enum.min()
+    |> IO.inspect
+  end
+
+  def closest_distance(wires) do
+    wires
+    |> closest_intersections()
     |> Enum.map(&get_distance(&1))
     |> Enum.min_by(fn x -> tl(x) end)
+    |> IO.inspect
+  end
+
+  def closest_intersections(wires) do
+      wires
+      |> String.split("\n")
+      |> Enum.map(&generate_path/1)
+      |> Enum.map(&MapSet.new(tl &1))
+      |> intersect
   end
 
   defp parse_input() do
     File.read!("../input.txt")
+  end
+
+  defp intersect([x | [y | _]]) do
+    MapSet.intersection(x, y)
   end
 
   defp generate_path(wire) do
